@@ -24,7 +24,7 @@ import me.fallenbreath.morestatistics.network.Network;
 import me.fallenbreath.morestatistics.utils.IdentifierUtil;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -53,7 +53,7 @@ public class MoreStatisticsMod implements ModInitializer
 		return version;
 	}
 
-	public static Identifier id(String name)
+	public static ResourceLocation id(String name)
 	{
 		return IdentifierUtil.of(MOD_ID, name);
 	}

@@ -22,7 +22,7 @@ package me.fallenbreath.morestatistics.network;
 
 import me.fallenbreath.fanetlib.api.nbt.FanetlibNbtUtils;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.util.PacketByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 
 public class MoreStatisticsPayload
 {
@@ -35,15 +35,15 @@ public class MoreStatisticsPayload
 		this.nbt = nbt;
 	}
 
-	public MoreStatisticsPayload(PacketByteBuf buf)
+	public MoreStatisticsPayload(FriendlyByteBuf buf)
 	{
 		this(buf.readVarInt(), FanetlibNbtUtils.readNbtAuto(buf));
 	}
 
-	public void write(PacketByteBuf buf)
+	public void write(FriendlyByteBuf buf)
 	{
 		buf.writeVarInt(this.id);
-	 	buf.writeCompoundTag(this.nbt);
+	 	buf.writeNbt(this.nbt);
 	}
 
 	public int getPacketId()

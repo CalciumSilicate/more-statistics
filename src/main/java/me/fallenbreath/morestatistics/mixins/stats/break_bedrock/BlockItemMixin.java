@@ -21,11 +21,11 @@
 package me.fallenbreath.morestatistics.mixins.stats.break_bedrock;
 
 import me.fallenbreath.morestatistics.utils.PistonPlacingMemory;
-import net.minecraft.block.Block;
-import net.minecraft.block.PistonBlock;
-import net.minecraft.item.BlockItem;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.piston.PistonBaseBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -38,21 +38,21 @@ public abstract class BlockItemMixin
 	@Shadow public abstract Block getBlock();
 
 	@ModifyArgs(
-			method = "place(Lnet/minecraft/item/ItemPlacementContext;)Lnet/minecraft/util/ActionResult;",
+			method = "place(Lnet/minecraft/world/item/BlockPlaceContext;)Lnet/minecraft/world/InteractionResult;",
 			at = @At(
 					value = "INVOKE",
 					//#if MC >= 12000
-					//$$ target = "Lnet/minecraft/advancement/criterion/ItemCriterion;trigger(Lnet/minecraft/server/network/ServerPlayerEntity;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/item/ItemStack;)V"
+					//$$ target = "Lnet/minecraft/advancements/critereon/ItemUsedOnLocationTrigger;trigger(Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/item/ItemStack;)V"
 					//#else
-					target = "Lnet/minecraft/advancement/criterion/PlacedBlockCriterion;trigger(Lnet/minecraft/server/network/ServerPlayerEntity;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/item/ItemStack;)V"
+					target = "Lnet/minecraft/advancements/critereon/PlacedBlockTrigger;trigger(Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/item/ItemStack;)V"
 					//#endif
 			)
 	)
 	private void rememberPistonPlacing(Args args)
 	{
-		if (this.getBlock() instanceof PistonBlock)
+		if (this.getBlock() instanceof PistonBaseBlock)
 		{
-			ServerPlayerEntity player = args.get(0);
+			ServerPlayer player = args.get(0);
 			BlockPos blockPos = args.get(1);
 			PistonPlacingMemory.onPlayerPlacedPiston(player, blockPos);
 		}

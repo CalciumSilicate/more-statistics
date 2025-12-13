@@ -21,32 +21,33 @@
 package me.fallenbreath.morestatistics.mixins.stats.ender_pearl_one_cm;
 
 import me.fallenbreath.morestatistics.MoreStatisticsRegistry;
-//#if MC >= 11600
-//$$ import net.minecraft.entity.Entity;
-//#else
-import net.minecraft.entity.LivingEntity;
-//#endif
-import net.minecraft.entity.thrown.ThrownEnderpearlEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.hit.HitResult;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.projectile.ThrownEnderpearl;
+import net.minecraft.world.phys.HitResult;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
+//#if MC >= 11600
+//$$ import net.minecraft.world.entity.Entity;
+//#else
+import net.minecraft.world.entity.LivingEntity;
+//#endif
+
 // impl for mc < 1.21
-@Mixin(ThrownEnderpearlEntity.class)
+@Mixin(ThrownEnderpearl.class)
 public abstract class ThrownEnderpearlEntityMixin
 {
 	@Inject(
-			method = "onCollision",
+			method = "onHit",
 			at = @At(
 					value = "INVOKE",
 					//#if MC >= 11600
-					//$$ target = "Lnet/minecraft/entity/Entity;requestTeleport(DDD)V",
+					//$$ target = "Lnet/minecraft/world/entity/Entity;teleportTo(DDD)V",
 					//#else
-					target = "Lnet/minecraft/entity/LivingEntity;requestTeleport(DDD)V",
+					target = "Lnet/minecraft/world/entity/LivingEntity;teleportTo(DDD)V",
 					//#endif
 					ordinal = 0
 			),
@@ -61,12 +62,12 @@ public abstract class ThrownEnderpearlEntityMixin
 			//#endif
 	)
 	{
-		if (entity instanceof ServerPlayerEntity)
+		if (entity instanceof ServerPlayer)
 		{
-			ServerPlayerEntity player = (ServerPlayerEntity)entity;
-			int distance = Math.round(player.distanceTo((ThrownEnderpearlEntity)(Object)this) * 100.0F);
+			ServerPlayer player = (ServerPlayer)entity;
+			int distance = Math.round(player.distanceTo((ThrownEnderpearl)(Object)this) * 100.0F);
 			if (distance > 0) {
-				player.increaseStat(MoreStatisticsRegistry.ENDER_PEARL_ONE_CM, distance);
+				player.awardStat(MoreStatisticsRegistry.ENDER_PEARL_ONE_CM, distance);
 			}
 		}
 	}

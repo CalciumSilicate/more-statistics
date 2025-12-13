@@ -20,25 +20,25 @@
 
 package me.fallenbreath.morestatistics.utils;
 
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 public class IdentifierUtil
 {
-	public static Identifier of(String id)
+	public static ResourceLocation of(String id)
 	{
 		//#if MC >= 12100
-		//$$ return Identifier.of(id);
+		//$$ return ResourceLocation.parse(id);
 		//#else
-		return new Identifier(id);
+		return new ResourceLocation(id);
 		//#endif
 	}
 
-	public static Identifier of(String namespace, String path)
+	public static ResourceLocation of(String namespace, String path)
 	{
 		//#if MC >= 12100
-		//$$ return Identifier.of(namespace, path);
+		//$$ return ResourceLocation.fromNamespaceAndPath(namespace, path);
 		//#else
-		return new Identifier(namespace, path);
+		return new ResourceLocation(namespace, path);
 		//#endif
 	}
 }

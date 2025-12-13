@@ -22,41 +22,41 @@ package me.fallenbreath.morestatistics.mixins.stats.ender_pearl_one_cm;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import me.fallenbreath.morestatistics.MoreStatisticsRegistry;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.projectile.thrown.EnderPearlEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.projectile.ThrownEnderpearl;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 // impl for mc >= 1.21
-@Mixin(EnderPearlEntity.class)
+@Mixin(ThrownEnderpearl.class)
 public abstract class ThrownEnderpearlEntityMixin
 {
 	@Inject(
-			method = "onCollision",
+			method = "onHit",
 			at = @At(
 					value = "INVOKE",
 					//#if MC >= 12103
-					//$$ target = "Lnet/minecraft/server/network/ServerPlayerEntity;teleportTo(Lnet/minecraft/world/TeleportTarget;)Lnet/minecraft/server/network/ServerPlayerEntity;"
+					//$$ target = "Lnet/minecraft/server/level/ServerPlayer;teleport(Lnet/minecraft/world/level/portal/TeleportTransition;)Lnet/minecraft/server/level/ServerPlayer;"
 					//#else
-					target = "Lnet/minecraft/entity/Entity;teleportTo(Lnet/minecraft/world/TeleportTarget;)Lnet/minecraft/entity/Entity;"
+					target = "Lnet/minecraft/world/entity/Entity;changeDimension(Lnet/minecraft/world/level/portal/DimensionTransition;)Lnet/minecraft/world/entity/Entity;"
 					//#endif
 			)
 	)
-	private void onEnderPearlHit(CallbackInfo ci, @Local Entity owner, @Local ServerWorld selfWorld)
+	private void onEnderPearlHit(CallbackInfo ci, @Local Entity owner, @Local ServerLevel selfWorld)
 	{
-		if (owner instanceof ServerPlayerEntity player)
+		if (owner instanceof ServerPlayer player)
 		{
 			// only calculate stats if the pearl and the owner are in a same dimension
-			if (player.getWorld().getDimensionEntry().equals(selfWorld.getDimensionEntry()))
+			if (player.level().dimensionTypeRegistration().equals(selfWorld.dimensionTypeRegistration()))
 			{
-				int distance = Math.round(player.distanceTo((EnderPearlEntity)(Object)this) * 100.0F);
+				int distance = Math.round(player.distanceTo((ThrownEnderpearl)(Object)this) * 100.0F);
 				if (distance > 0)
 				{
-					player.increaseStat(MoreStatisticsRegistry.ENDER_PEARL_ONE_CM, distance);
+					player.awardStat(MoreStatisticsRegistry.ENDER_PEARL_ONE_CM, distance);
 				}
 			}
 		}

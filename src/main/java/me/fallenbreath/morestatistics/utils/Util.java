@@ -30,7 +30,7 @@ public class Util
 	public static String getStringOrEmpty(CompoundTag nbt, String key)
 	{
 		//#if MC >= 12105
-		//$$ return nbt.getString(key, "");
+		//$$ return nbt.getStringOr(key, "");
 		//#else
 		return nbt.getString(key);
 		//#endif
@@ -39,7 +39,7 @@ public class Util
 	public static int getIntOrZero(CompoundTag nbt, String key)
 	{
 		//#if MC >= 12105
-		//$$ return nbt.getInt(key, 0);
+		//$$ return nbt.getIntOr(key, 0);
 		//#else
 		return nbt.getInt(key);
 		//#endif
@@ -48,7 +48,7 @@ public class Util
 	public static CompoundTag getNbtOrEmpty(CompoundTag nbt, String key)
 	{
 		//#if MC >= 12105
-		//$$ return nbt.getCompound(key).orElseGet(NbtCompound::new);
+		//$$ return nbt.getCompound(key).orElseGet(CompoundTag::new);
 		//#else
 		return nbt.getCompound(key);
 		//#endif

@@ -21,48 +21,48 @@
 package me.fallenbreath.morestatistics.mixins.scoreboard.blockPlacedCount;
 
 import me.fallenbreath.morestatistics.MoreStatisticsScoreboardCriterion;
-import net.minecraft.item.BlockItem;
-import net.minecraft.scoreboard.Scoreboard;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.scores.Scoreboard;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 //#if MC >= 12004
-//$$ import net.minecraft.scoreboard.ScoreAccess;
+//$$ import net.minecraft.world.scores.ScoreAccess;
 //#else
-import net.minecraft.scoreboard.ScoreboardPlayerScore;
+import net.minecraft.world.scores.Score;
 //#endif
 
 @Mixin(BlockItem.class)
 public abstract class BlockItemMixin
 {
 	@ModifyArg(
-			method = "place(Lnet/minecraft/item/ItemPlacementContext;)Lnet/minecraft/util/ActionResult;",
+			method = "place(Lnet/minecraft/world/item/BlockPlaceContext;)Lnet/minecraft/world/InteractionResult;",
 			at = @At(
 					value = "INVOKE",
 					//#if MC >= 12000
-					//$$ target = "Lnet/minecraft/advancement/criterion/ItemCriterion;trigger(Lnet/minecraft/server/network/ServerPlayerEntity;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/item/ItemStack;)V"
+					//$$ target = "Lnet/minecraft/advancements/critereon/ItemUsedOnLocationTrigger;trigger(Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/item/ItemStack;)V"
 					//#else
-					target = "Lnet/minecraft/advancement/criterion/PlacedBlockCriterion;trigger(Lnet/minecraft/server/network/ServerPlayerEntity;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/item/ItemStack;)V"
+					target = "Lnet/minecraft/advancements/critereon/PlacedBlockTrigger;trigger(Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/item/ItemStack;)V"
 					//#endif
 			),
 			index = 0
 	)
-	private ServerPlayerEntity onPlayerPlacedBlock(ServerPlayerEntity player)
+	private ServerPlayer onPlayerPlacedBlock(ServerPlayer player)
 	{
 		//#if MC >= 1.21.9
-		//$$ Scoreboard scoreboard = player.getEntityWorld().getScoreboard();
+		//$$ Scoreboard scoreboard = player.level().getScoreboard();
 		//#else
 		Scoreboard scoreboard = player.getScoreboard();
 		//#endif
 
-		scoreboard.forEachScore(
+		scoreboard.forAllObjectives(
 				MoreStatisticsScoreboardCriterion.BLOCK_PLACED_COUNT,
 				//#if MC >= 12004
-				//$$ player, ScoreAccess::incrementScore
+				//$$ player, ScoreAccess::increment
 				//#else
-				player.getEntityName(), ScoreboardPlayerScore::incrementScore
+				player.getScoreboardName(), Score::increment
 				//#endif
 		);
 		return player;

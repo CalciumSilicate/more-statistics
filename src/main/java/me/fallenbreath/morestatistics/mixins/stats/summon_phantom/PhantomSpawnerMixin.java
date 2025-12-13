@@ -21,32 +21,32 @@
 package me.fallenbreath.morestatistics.mixins.stats.summon_phantom;
 
 import me.fallenbreath.morestatistics.MoreStatisticsRegistry;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.world.gen.PhantomSpawner;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.levelgen.PhantomSpawner;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 //#if MC >= 11200
-//$$ import net.minecraft.server.network.ServerPlayerEntity;
+//$$ import net.minecraft.server.level.ServerPlayer;
 //#endif
 
 @Mixin(PhantomSpawner.class)
 public abstract class PhantomSpawnerMixin
 {
-	private PlayerEntity currentPlayer$moreStatistics = null;
+	private Player currentPlayer$moreStatistics = null;
 
 	@ModifyVariable(
-			method = "spawn",
+			method = "tick",
 			at = @At(
 					value = "INVOKE",
-					target = "Lnet/minecraft/util/math/MathHelper;clamp(III)I"
+					target = "Lnet/minecraft/util/Mth;clamp(III)I"
 			)
 	)
 	//#if MC >= 12000
-	//$$ private ServerPlayerEntity recordsCurrentPlayer$moreStatistics(ServerPlayerEntity player)
+	//$$ private ServerPlayer recordsCurrentPlayer$moreStatistics(ServerPlayer player)
 	//#else
-	private PlayerEntity recordsCurrentPlayer$moreStatistics(PlayerEntity player)
+	private Player recordsCurrentPlayer$moreStatistics(Player player)
 	//#endif
 	{
 		this.currentPlayer$moreStatistics = player;
@@ -54,10 +54,10 @@ public abstract class PhantomSpawnerMixin
 	}
 
 	@ModifyVariable(
-			method = "spawn",
+			method = "tick",
 			at = @At(
 					value = "FIELD",
-					target = "Lnet/minecraft/entity/EntityType;PHANTOM:Lnet/minecraft/entity/EntityType;"
+					target = "Lnet/minecraft/world/entity/EntityType;PHANTOM:Lnet/minecraft/world/entity/EntityType;"
 			),
 			ordinal = 1
 	)
@@ -65,7 +65,7 @@ public abstract class PhantomSpawnerMixin
 	{
 		if (this.currentPlayer$moreStatistics != null)
 		{
-			this.currentPlayer$moreStatistics.increaseStat(MoreStatisticsRegistry.SUMMON_PHANTOM, amount);
+			this.currentPlayer$moreStatistics.awardStat(MoreStatisticsRegistry.SUMMON_PHANTOM, amount);
 			this.currentPlayer$moreStatistics = null;
 		}
 		return amount;

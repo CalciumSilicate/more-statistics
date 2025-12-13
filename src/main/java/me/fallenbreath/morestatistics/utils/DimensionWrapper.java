@@ -20,26 +20,28 @@
 
 package me.fallenbreath.morestatistics.utils;
 
-//#if MC >= 11600
-//$$ import net.minecraft.util.registry.RegistryKey;
-//#else
-import net.minecraft.world.dimension.DimensionType;
-//#endif
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.dimension.DimensionType;
 
 import java.util.Objects;
+
+//#if MC >= 11600
+//$$ import net.minecraft.resources.ResourceKey;
+//#else
+import net.minecraft.world.level.dimension.DimensionType;
+//#endif
 
 public class DimensionWrapper
 {
 	//#if MC >= 11600
-	//$$ private final RegistryKey<World> dimensionType;
+	//$$ private final ResourceKey<Level> dimensionType;
 	//#else
 	private final DimensionType dimensionType;
 	//#endif
 
 	private DimensionWrapper(
 			//#if MC >= 11600
-			//$$ RegistryKey<World> dimensionType
+			//$$ ResourceKey<Level> dimensionType
 			//#else
 			DimensionType dimensionType
 			//#endif
@@ -48,11 +50,11 @@ public class DimensionWrapper
 		this.dimensionType = dimensionType;
 	}
 
-	public static DimensionWrapper of(World world)
+	public static DimensionWrapper of(Level world)
 	{
 		return new DimensionWrapper(
 				//#if MC >= 11600
-				//$$ world.getRegistryKey()
+				//$$ world.dimension()
 				//#else
 				world.getDimension().getType()
 				//#endif

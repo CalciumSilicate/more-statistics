@@ -20,9 +20,9 @@
 
 package me.fallenbreath.morestatistics.mixins.core.stats;
 
-import net.minecraft.stat.StatType;
-import net.minecraft.stat.Stats;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.stats.StatType;
+import net.minecraft.stats.Stats;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
@@ -30,7 +30,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface StatsAccessor
 {
 	@Accessor
-	static StatType<Identifier> getCUSTOM()
+	static StatType<ResourceLocation> getCUSTOM()
 	{
 		throw new RuntimeException();
 	}

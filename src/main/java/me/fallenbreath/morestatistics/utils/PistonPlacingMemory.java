@@ -22,30 +22,34 @@ package me.fallenbreath.morestatistics.utils;
 
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
 public class PistonPlacingMemory
 {
-	private static final Map<Pair<DimensionWrapper, BlockPos>, ServerPlayerEntity> MEMORY = Maps.newHashMap();
+	private static final Map<Pair<DimensionWrapper, BlockPos>, ServerPlayer> MEMORY = Maps.newHashMap();
 
-	public static void onPlayerPlacedPiston(ServerPlayerEntity player, BlockPos pos)
+	public static void onPlayerPlacedPiston(ServerPlayer player, BlockPos pos)
 	{
-		MEMORY.put(makePair(player.getServerWorld(), pos), player);
+		//#if MC >= 1.20.1
+		//$$ Level playerLevel = player.level();
+		//#else
+		Level playerLevel = player.getLevel();
+		//#endif
+		MEMORY.put(makePair(playerLevel, pos), player);
 	}
 
 	@Nullable
-	public static ServerPlayerEntity getTheOneWhoJustPlacedPiston(World world, BlockPos pos)
+	public static ServerPlayer getTheOneWhoJustPlacedPiston(Level world, BlockPos pos)
 	{
 		return MEMORY.get(makePair(world, pos));
 	}
 
-	private static Pair<DimensionWrapper, BlockPos> makePair(World world, BlockPos pos)
+	private static Pair<DimensionWrapper, BlockPos> makePair(Level world, BlockPos pos)
 	{
 		return Pair.of(DimensionWrapper.of(world), pos);
 	}

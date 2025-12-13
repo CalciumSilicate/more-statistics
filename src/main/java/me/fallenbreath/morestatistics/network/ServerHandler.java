@@ -27,9 +27,9 @@ import me.fallenbreath.morestatistics.MoreStatisticsScoreboardCriterion;
 import me.fallenbreath.morestatistics.utils.IdentifierUtil;
 import me.fallenbreath.morestatistics.utils.Util;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.stat.Stat;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.Stat;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -37,16 +37,16 @@ import java.util.stream.Collectors;
 public class ServerHandler
 {
 	private static final Object LOCK = new Object();
-	private static final Map<ServerPlayerEntity, Set<Identifier>> acceptedStats = new WeakHashMap<>();
+	private static final Map<ServerPlayer, Set<ResourceLocation>> acceptedStats = new WeakHashMap<>();
 
-	public static void handleClientPacket(MoreStatisticsPayload payload, ServerPlayerEntity player)
+	public static void handleClientPacket(MoreStatisticsPayload payload, ServerPlayer player)
 	{
 		int id = payload.getPacketId();
 		switch (id)
 		{
 			case Network.C2S.STATS_LIST:
 				CompoundTag nbt = Objects.requireNonNull(payload.getNbt());
-				List<Identifier> list = Util.nbt2StringList(Util.getNbtOrEmpty(nbt, "data")).stream().map(IdentifierUtil::of).collect(Collectors.toList());
+				List<ResourceLocation> list = Util.nbt2StringList(Util.getNbtOrEmpty(nbt, "data")).stream().map(IdentifierUtil::of).collect(Collectors.toList());
 				MoreStatisticsMod.LOGGER.debug("Received accepted stats list from player {}: {}", player.getName().getString(), list);
 				synchronized (LOCK)
 				{
@@ -56,19 +56,19 @@ public class ServerHandler
 
 			case Network.C2S.SCOREBOARD_CRITERION_QUERY:
 				MoreStatisticsMod.LOGGER.debug("Received scoreboard criterion query from player {}", player.getName().getString());
-				player.networkHandler.sendPacket(Network.S2C.packet(Network.S2C.SCOREBOARD_CRITERION_LIST, nbt2 -> {
+				player.connection.send(Network.S2C.packet(Network.S2C.SCOREBOARD_CRITERION_LIST, nbt2 -> {
 					nbt2.put("data", Util.stringList2Nbt(MoreStatisticsScoreboardCriterion.getCriterionNameList()));
 				}));
 				break;
 		}
 	}
 
-	public static boolean canSendStat(ServerPlayerEntity player, Stat<?> stat)
+	public static boolean canSendStat(ServerPlayer player, Stat<?> stat)
 	{
 		Object key = stat.getValue();
-		if (key instanceof Identifier)
+		if (key instanceof ResourceLocation)
 		{
-			Identifier statId = (Identifier)key;
+			ResourceLocation statId = (ResourceLocation)key;
 			if (MoreStatisticsRegistry.getStatsSet().contains(statId))
 			{
 				synchronized (LOCK)

@@ -21,16 +21,16 @@
 package me.fallenbreath.morestatistics.mixins.stats.firework_boost;
 
 import me.fallenbreath.morestatistics.MoreStatisticsRegistry;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.FireworkItem;
-import net.minecraft.util.Hand;
-import net.minecraft.world.World;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.FireworkRocketItem;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(FireworkItem.class)
+@Mixin(FireworkRocketItem.class)
 public abstract class FireworkItemMixin
 {
 	@Inject(
@@ -38,14 +38,14 @@ public abstract class FireworkItemMixin
 			at = @At(
 					value = "INVOKE",
 					//#if MC >= 12102
-					//$$ target = "Lnet/minecraft/entity/projectile/ProjectileEntity;spawn(Lnet/minecraft/entity/projectile/ProjectileEntity;Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/item/ItemStack;)Lnet/minecraft/entity/projectile/ProjectileEntity;"
+					//$$ target = "Lnet/minecraft/world/entity/projectile/Projectile;spawnProjectile(Lnet/minecraft/world/entity/projectile/Projectile;Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/entity/projectile/Projectile;"
 					//#else
-					target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z"
+					target = "Lnet/minecraft/world/level/Level;addFreshEntity(Lnet/minecraft/world/entity/Entity;)Z"
 					//#endif
 			)
 	)
-	private void onFireworkBoost(World world, PlayerEntity user, Hand hand, CallbackInfoReturnable<?> ci)
+	private void onFireworkBoost(Level world, Player user, InteractionHand hand, CallbackInfoReturnable<?> ci)
 	{
-		user.increaseStat(MoreStatisticsRegistry.FIREWORK_BOOST, 1);
+		user.awardStat(MoreStatisticsRegistry.FIREWORK_BOOST, 1);
 	}
 }

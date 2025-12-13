@@ -25,8 +25,8 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import me.fallenbreath.morestatistics.MoreStatisticsScoreboardCriterion;
 import me.fallenbreath.morestatistics.network.ClientHandler;
-import net.minecraft.client.network.ClientCommandSource;
-import net.minecraft.command.arguments.ObjectiveCriteriaArgumentType;
+import net.minecraft.client.multiplayer.ClientSuggestionProvider;
+import net.minecraft.commands.arguments.ObjectiveCriteriaArgument;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
@@ -35,7 +35,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Mixin(ObjectiveCriteriaArgumentType.class)
+@Mixin(ObjectiveCriteriaArgument.class)
 public abstract class ObjectiveCriteriaArgumentTypeMixin
 {
 	@SuppressWarnings("InvalidInjectorMethodSignature")
@@ -52,7 +52,7 @@ public abstract class ObjectiveCriteriaArgumentTypeMixin
 	private <S> List<String> adjustCriterionSuggestions(List<String> suggestions, CommandContext<S> context, SuggestionsBuilder builder)
 	{
 		// only modify at client side
-		if (context.getSource() instanceof ClientCommandSource)
+		if (context.getSource() instanceof ClientSuggestionProvider)
 		{
 			List<String> newSuggestions = Lists.newArrayList();
 			Set<String> msCriterions = new HashSet<>(MoreStatisticsScoreboardCriterion.getCriterionNameList());

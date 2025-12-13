@@ -21,10 +21,10 @@
 package me.fallenbreath.morestatistics.mixins.core.stats;
 
 import me.fallenbreath.morestatistics.network.ClientHandler;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.StatsScreen;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.achievement.StatsScreen;
+import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(StatsScreen.class)
 public abstract class StatsScreenMixin extends Screen
 {
-	protected StatsScreenMixin(Text title)
+	protected StatsScreenMixin(Component title)
 	{
 		super(title);
 	}
@@ -41,14 +41,10 @@ public abstract class StatsScreenMixin extends Screen
 	@Inject(method = "init", at = @At(value = "HEAD"))
 	private void onStatsScreenInit(CallbackInfo ci)
 	{
-		//#if MC >= 11600
-		//$$ MinecraftClient mc = this.client;
-		//#else
-		MinecraftClient mc = this.minecraft;
-		//#endif
-		if (mc != null && mc.getNetworkHandler() != null)
+		Minecraft mc = this.minecraft;
+		if (mc != null && mc.getConnection() != null)
 		{
-			ClientHandler.sendAcceptedStatList(mc.getNetworkHandler());
+			ClientHandler.sendAcceptedStatList(mc.getConnection());
 		}
 	}
 }

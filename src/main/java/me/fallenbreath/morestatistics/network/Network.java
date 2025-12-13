@@ -28,8 +28,8 @@ import me.fallenbreath.morestatistics.MoreStatisticsMod;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
-import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
+import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
+import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 
 import java.util.function.Consumer;
 
@@ -42,7 +42,7 @@ public class Network
 		public static final int STATS_LIST = 1;
 		public static final int SCOREBOARD_CRITERION_QUERY = 2;
 
-		public static CustomPayloadC2SPacket packet(int packetId, Consumer<CompoundTag> payloadBuilder)
+		public static ServerboundCustomPayloadPacket packet(int packetId, Consumer<CompoundTag> payloadBuilder)
 		{
 			CompoundTag nbt = new CompoundTag();
 			payloadBuilder.accept(nbt);
@@ -54,7 +54,7 @@ public class Network
 	{
 		public static final int SCOREBOARD_CRITERION_LIST = 1;
 
-		public static CustomPayloadS2CPacket packet(int packetId, Consumer<CompoundTag> payloadBuilder)
+		public static ClientboundCustomPayloadPacket packet(int packetId, Consumer<CompoundTag> payloadBuilder)
 		{
 			CompoundTag nbt = new CompoundTag();
 			payloadBuilder.accept(nbt);

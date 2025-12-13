@@ -31,13 +31,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class MinecraftServerMixin
 {
 	@Inject(
-			method = "tickWorlds",
+			method = "tickChildren",
 			at = @At(
 					value = "INVOKE",
 					//#if MC >= 12102
-					//$$ target = "Lnet/minecraft/server/MinecraftServer;tickNetworkIo()V"
+					//$$ target = "Lnet/minecraft/server/MinecraftServer;tickConnection()V"
 					//#else
-					target = "Lnet/minecraft/server/ServerNetworkIo;tick()V"
+					target = "Lnet/minecraft/server/network/ServerConnectionListener;tick()V"
 					//#endif
 			)
 	)

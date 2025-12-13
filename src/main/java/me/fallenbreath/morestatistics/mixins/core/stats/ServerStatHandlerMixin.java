@@ -22,14 +22,14 @@ package me.fallenbreath.morestatistics.mixins.core.stats;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import me.fallenbreath.morestatistics.network.ServerHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.stat.ServerStatHandler;
-import net.minecraft.stat.Stat;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.ServerStatsCounter;
+import net.minecraft.stats.Stat;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Mixin(ServerStatHandler.class)
+@Mixin(ServerStatsCounter.class)
 public abstract class ServerStatHandlerMixin
 {
 	@Redirect(
@@ -40,7 +40,7 @@ public abstract class ServerStatHandlerMixin
 					remap = false
 			)
 	)
-	private int dontPutNotVanillaStat(Object2IntMap<Stat<?>> map, Object obj, int value, ServerPlayerEntity player)
+	private int dontPutNotVanillaStat(Object2IntMap<Stat<?>> map, Object obj, int value, ServerPlayer player)
 	{
 		if (ServerHandler.canSendStat(player, (Stat<?>)obj))
 		{

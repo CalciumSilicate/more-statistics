@@ -21,10 +21,10 @@
 package me.fallenbreath.morestatistics.mixins.core.scoreboard;
 
 import me.fallenbreath.morestatistics.MoreStatisticsScoreboardCriterion;
-import net.minecraft.scoreboard.ScoreboardCriterion;
+import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(ScoreboardCriterion.class)
+@Mixin(ObjectiveCriteria.class)
 public abstract class ScoreboardCriterionMixin
 {
 	static

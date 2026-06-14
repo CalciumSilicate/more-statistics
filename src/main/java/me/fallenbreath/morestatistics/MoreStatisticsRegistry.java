@@ -40,6 +40,8 @@ public class MoreStatisticsRegistry
 	public static final ResourceLocation ENDER_PEARL_ONE_CM = register("ender_pearl_one_cm", StatFormatter.DISTANCE);
 	public static final ResourceLocation FIREWORK_BOOST = register("firework_boost", StatFormatter.DEFAULT);
 	public static final ResourceLocation MEND_DURABILITY = register("mend_durability", StatFormatter.DEFAULT);
+	public static final ResourceLocation MINE_BLOCK = register("mine_block", StatFormatter.DEFAULT);
+	public static final ResourceLocation PLACE_BLOCK = register("place_block", StatFormatter.DEFAULT);
 	public static final ResourceLocation SUMMON_PHANTOM = register("summon_phantom", StatFormatter.DEFAULT);
 
 	private static ResourceLocation register(String name, StatFormatter statFormatter)

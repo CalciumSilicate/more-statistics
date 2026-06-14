@@ -18,25 +18,18 @@
  * along with More Statistics.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.fallenbreath.morestatistics.mixins.scoreboard.blockPlacedCount;
+package me.fallenbreath.morestatistics.mixins.stats.place_block;
 
-import me.fallenbreath.morestatistics.MoreStatisticsScoreboardCriterion;
+import me.fallenbreath.morestatistics.MoreStatisticsRegistry;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.BlockPlaceContext;
-import net.minecraft.world.scores.Scoreboard;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-//#if MC >= 12004
-//$$ import net.minecraft.world.scores.ScoreAccess;
-//#else
-import net.minecraft.world.scores.Score;
-//#endif
 
 @Mixin(BlockItem.class)
 public abstract class BlockItemMixin
@@ -51,26 +44,10 @@ public abstract class BlockItemMixin
 	)
 	private void onPlayerPlacedBlock(BlockPlaceContext context, CallbackInfoReturnable<InteractionResult> cir)
 	{
-		Player playerEntity = context.getPlayer();
-		if (!(playerEntity instanceof ServerPlayer))
+		Player player = context.getPlayer();
+		if (player instanceof ServerPlayer)
 		{
-			return;
+			((ServerPlayer)player).awardStat(MoreStatisticsRegistry.PLACE_BLOCK, 1);
 		}
-
-		ServerPlayer player = (ServerPlayer)playerEntity;
-		//#if MC >= 1.21.9
-		//$$ Scoreboard scoreboard = player.level().getScoreboard();
-		//#else
-		Scoreboard scoreboard = player.getScoreboard();
-		//#endif
-
-		scoreboard.forAllObjectives(
-				MoreStatisticsScoreboardCriterion.BLOCK_PLACED_COUNT,
-				//#if MC >= 12004
-				//$$ player, ScoreAccess::increment
-				//#else
-				player.getScoreboardName(), Score::increment
-				//#endif
-		);
 	}
 }

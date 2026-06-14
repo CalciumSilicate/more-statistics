@@ -23,38 +23,41 @@ package me.fallenbreath.morestatistics.mixins.stats.break_bedrock;
 import me.fallenbreath.morestatistics.utils.PistonPlacingMemory;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.piston.PistonBaseBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyArgs;
-import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(BlockItem.class)
 public abstract class BlockItemMixin
 {
 	@Shadow public abstract Block getBlock();
 
-	@ModifyArgs(
+	@Inject(
 			method = "place(Lnet/minecraft/world/item/BlockPlaceContext;)Lnet/minecraft/world/InteractionResult;",
 			at = @At(
 					value = "INVOKE",
-					//#if MC >= 12000
-					//$$ target = "Lnet/minecraft/advancements/critereon/ItemUsedOnLocationTrigger;trigger(Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/item/ItemStack;)V"
-					//#else
-					target = "Lnet/minecraft/advancements/critereon/PlacedBlockTrigger;trigger(Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/item/ItemStack;)V"
-					//#endif
+					target = "Lnet/minecraft/world/level/block/Block;setPlacedBy(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;)V",
+					shift = At.Shift.AFTER
 			)
 	)
-	private void rememberPistonPlacing(Args args)
+	private void rememberPistonPlacing(BlockPlaceContext context, CallbackInfoReturnable<InteractionResult> cir)
 	{
 		if (this.getBlock() instanceof PistonBaseBlock)
 		{
-			ServerPlayer player = args.get(0);
-			BlockPos blockPos = args.get(1);
-			PistonPlacingMemory.onPlayerPlacedPiston(player, blockPos);
+			Player player = context.getPlayer();
+			if (player instanceof ServerPlayer)
+			{
+				BlockPos blockPos = context.getClickedPos();
+				PistonPlacingMemory.onPlayerPlacedPiston((ServerPlayer)player, blockPos);
+			}
 		}
 	}
 }

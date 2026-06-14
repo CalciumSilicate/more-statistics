@@ -1,10 +1,17 @@
+def parseMcVersion = { String version ->
+	def parts = version.split(/\./).collect { it as int }
+	return parts[0] * 10000 + parts[1] * 100 + parts[2]
+}
+int mcVersion = parseMcVersion(project.name)
+boolean isMc26 = mcVersion >= 260000
+
 apply plugin: 'maven-publish'
 apply plugin: 'com.github.hierynomus.license'
-apply plugin: 'fabric-loom'
-apply plugin: 'com.replaymod.preprocess'
+apply plugin: isMc26 ? 'net.fabricmc.fabric-loom' : 'fabric-loom'
+if (!isMc26) {
+	apply plugin: 'com.replaymod.preprocess'
+}
 apply plugin: 'me.fallenbreath.yamlang'
-
-int mcVersion = project.mcVersion
 
 repositories {
 	maven {
@@ -29,13 +36,19 @@ configurations {
 dependencies {
 	// loom
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings loom.layered() {
-		officialMojangMappings()
-		if (project.parchment_version.size() > 0) {
-			parchment("org.parchmentmc.data:parchment-${project.minecraft_version}:${project.parchment_version}@zip")
+	if (!isMc26) {
+		mappings loom.layered() {
+			officialMojangMappings()
+			if (project.parchment_version.size() > 0) {
+				parchment("org.parchmentmc.data:parchment-${project.minecraft_version}:${project.parchment_version}@zip")
+			}
 		}
 	}
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	if (isMc26) {
+		implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	} else {
+		modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	}
 
 	// runtime mods
 	if (mcVersion < 11904) {
@@ -45,28 +58,59 @@ dependencies {
 
 	// dependencies
 	def fabricApiModules = []
-	if (mcVersion >= 12105) {  // "fabric-resource-loader-v0" dependency since fabric api 0.117.0 (25w07a, mc1.21.5 snapshot)
+	if (isMc26) {
 		fabricApiModules.add("fabric-api-base")
-	}
-	if (mcVersion < 12111) {  // "fabric-resource-loader" is fully moved from v0 to v1 since fabric api 0.139.3 (1.21.11-pre4)
-		fabricApiModules.add("fabric-resource-loader-v0")
-	}
-	if (mcVersion >= 12109) {  // "fabric-resource-loader-v0" dependency since fabric api 0.133.11 (1.21.9-rc1)
 		fabricApiModules.add("fabric-resource-loader-v1")
 	}
+	else {
+		if (mcVersion >= 12105) {  // "fabric-resource-loader-v0" dependency since fabric api 0.117.0 (25w07a, mc1.21.5 snapshot)
+			fabricApiModules.add("fabric-api-base")
+		}
+		if (mcVersion < 12111) {  // "fabric-resource-loader" is fully moved from v0 to v1 since fabric api 0.139.3 (1.21.11-pre4)
+			fabricApiModules.add("fabric-resource-loader-v0")
+		}
+		if (mcVersion >= 12109) {  // "fabric-resource-loader-v0" dependency since fabric api 0.133.11 (1.21.9-rc1)
+			fabricApiModules.add("fabric-resource-loader-v1")
+		}
+	}
 	fabricApiModules.forEach {
-		include(modImplementation(fabricApi.module(it, project.fabric_api_version)))
+		if (isMc26) {
+			include(implementation(fabricApi.module(it, project.fabric_api_version)))
+		} else {
+			include(modImplementation(fabricApi.module(it, project.fabric_api_version)))
+		}
 	}
 
-	def fanetlibMcVer = mcVersion >= 12111 ? '1.21.11' : mcVersion >= 12100 ? '1.21.1' : mcVersion >= 12006 ? '1.20.6' : mcVersion >= 12002 ? '1.20.2': '1.15.2'
-	include(modImplementation("me.fallenbreath:fanetlib:${project.fanetlib_version}-mc${fanetlibMcVer}"))
+	def fanetlibMcVer = isMc26 ? '26.1.1' : mcVersion >= 12111 ? '1.21.11' : mcVersion >= 12100 ? '1.21.1' : mcVersion >= 12006 ? '1.20.6' : mcVersion >= 12002 ? '1.20.2': '1.15.2'
+	if (isMc26) {
+		include(implementation("me.fallenbreath:fanetlib:${project.fanetlib_version}-mc${fanetlibMcVer}"))
+	} else {
+		include(modImplementation("me.fallenbreath:fanetlib:${project.fanetlib_version}-mc${fanetlibMcVer}"))
+	}
 }
 
 String MIXIN_CONFIG_PATH = 'more-statistics.mixins.json'
 String LANG_DIR = 'assets/more-statistics/lang'
+if (isMc26) {
+	sourceSets.main.java.setSrcDirs([rootProject.file('versions/1.21.11/build/preprocessed/main/java')])
+	sourceSets.main.resources.setSrcDirs([rootProject.file('versions/1.21.11/build/preprocessed/main/resources')])
+	tasks.named('compileJava').configure {
+		dependsOn ':1.21.11:preprocessCode'
+	}
+	tasks.named('processResources').configure {
+		dependsOn ':1.21.11:preprocessResources'
+	}
+	tasks.matching { it.name == 'sourcesJar' }.configureEach {
+		dependsOn ':1.21.11:preprocessCode', ':1.21.11:preprocessResources'
+	}
+}
 JavaVersion JAVA_COMPATIBILITY
 if (mcVersion >= 12005) {
-	JAVA_COMPATIBILITY = JavaVersion.VERSION_21
+	if (isMc26) {
+		JAVA_COMPATIBILITY = JavaVersion.VERSION_25
+	} else {
+		JAVA_COMPATIBILITY = JavaVersion.VERSION_21
+	}
 } else if (mcVersion >= 11800) {
 	JAVA_COMPATIBILITY = JavaVersion.VERSION_17
 } else if (mcVersion >= 11700) {
@@ -165,6 +209,9 @@ yamlang {
 tasks.withType(JavaCompile).configureEach {
 	options.encoding = "UTF-8"
 	options.compilerArgs << "-Xlint:deprecation" << "-Xlint:unchecked"
+	if (isMc26) {
+		options.release = 25
+	}
 	if (JAVA_COMPATIBILITY <= JavaVersion.VERSION_1_8) {
 		// suppressed "source/target value 8 is obsolete and will be removed in a future release"
 		options.compilerArgs << '-Xlint:-options'
@@ -219,8 +266,14 @@ license {
 		year = Calendar.getInstance().get(Calendar.YEAR).toString()
 	}
 }
-classes.dependsOn licenseFormatMain
-testClasses.dependsOn licenseFormatTest
+if (isMc26) {
+	tasks.matching { it.name.startsWith('license') }.configureEach {
+		enabled = false
+	}
+} else {
+	classes.dependsOn licenseFormatMain
+	testClasses.dependsOn licenseFormatTest
+}
 
 // configure the maven publication
 publishing {

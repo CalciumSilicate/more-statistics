@@ -3,4 +3,6 @@ stat.minecraft:
   ender_pearl_one_cm: 末影珍珠传送距离
   firework_boost: 烟花加速次数
   mend_durability: 经验修补修复耐久度
+  mine_block: 挖掘方块数
+  place_block: 放置方块数
   summon_phantom: 幻翼召唤数

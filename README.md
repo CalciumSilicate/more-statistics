@@ -38,6 +38,18 @@ Increases when a player repair an item with mending enchantment
 
 Criteria: `minecraft.custom:minecraft.mend_durability`
 
+## mine_block
+
+Increases when a player successfully mines a block
+
+Criteria: `minecraft.custom:minecraft.mine_block`
+
+## place_block
+
+Increases when a player successfully places a block
+
+Criteria: `minecraft.custom:minecraft.place_block`
+
 ## summon_phantom
 
 The total amount of phantom you have summoned
@@ -54,4 +66,3 @@ Triggers when a player places a block
 Technically the time it gets triggered is right after a player uses a `BlockItem` successfully
 
 Criteria: `blockPlacedCount`
-

@@ -21,11 +21,15 @@
 package me.fallenbreath.morestatistics.mixins.stats.summon_phantom;
 
 import me.fallenbreath.morestatistics.MoreStatisticsRegistry;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.levelgen.PhantomSpawner;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 //#if MC >= 11200
 //$$ import net.minecraft.server.level.ServerPlayer;
@@ -53,21 +57,45 @@ public abstract class PhantomSpawnerMixin
 		return player;
 	}
 
-	@ModifyVariable(
+	@Inject(
 			method = "tick",
 			at = @At(
-					value = "FIELD",
-					target = "Lnet/minecraft/world/entity/EntityType;PHANTOM:Lnet/minecraft/world/entity/EntityType;"
-			),
-			ordinal = 1
+					value = "INVOKE",
+					//#if MC >= 11600
+					//$$ target = "Lnet/minecraft/server/level/ServerLevel;addFreshEntityWithPassengers(Lnet/minecraft/world/entity/Entity;)V",
+					//#else
+					target = "Lnet/minecraft/server/level/ServerLevel;addFreshEntity(Lnet/minecraft/world/entity/Entity;)Z",
+					//#endif
+					shift = At.Shift.AFTER
+			)
 	)
-	private int addSummonPhantomStat$moreStatistics(int amount)
+	//#if MC >= 12110
+	//$$ private void addSummonPhantomStat$moreStatistics(ServerLevel world, boolean spawnMonsters, CallbackInfo ci)
+	//#else
+	//#if MC >= 12105
+	//$$ private void addSummonPhantomStat$moreStatistics(ServerLevel world, boolean spawnMonsters, boolean spawnAnimals, CallbackInfo ci)
+	//#else
+	private void addSummonPhantomStat$moreStatistics(ServerLevel world, boolean spawnMonsters, boolean spawnAnimals, CallbackInfoReturnable<Integer> cir)
+	//#endif
+	//#endif
 	{
 		if (this.currentPlayer$moreStatistics != null)
 		{
-			this.currentPlayer$moreStatistics.awardStat(MoreStatisticsRegistry.SUMMON_PHANTOM, amount);
-			this.currentPlayer$moreStatistics = null;
+			this.currentPlayer$moreStatistics.awardStat(MoreStatisticsRegistry.SUMMON_PHANTOM, 1);
 		}
-		return amount;
+	}
+
+	@Inject(method = "tick", at = @At("RETURN"))
+	//#if MC >= 12110
+	//$$ private void clearCurrentPlayer$moreStatistics(ServerLevel world, boolean spawnMonsters, CallbackInfo ci)
+	//#else
+	//#if MC >= 12105
+	//$$ private void clearCurrentPlayer$moreStatistics(ServerLevel world, boolean spawnMonsters, boolean spawnAnimals, CallbackInfo ci)
+	//#else
+	private void clearCurrentPlayer$moreStatistics(ServerLevel world, boolean spawnMonsters, boolean spawnAnimals, CallbackInfoReturnable<Integer> cir)
+	//#endif
+	//#endif
+	{
+		this.currentPlayer$moreStatistics = null;
 	}
 }

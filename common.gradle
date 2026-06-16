@@ -1,6 +1,6 @@
 def parseMcVersion = { String version ->
 	def parts = version.split(/\./).collect { it as int }
-	return parts[0] * 10000 + parts[1] * 100 + parts[2]
+	return parts[0] * 10000 + parts[1] * 100 + (parts.size() > 2 ? parts[2] : 0)
 }
 int mcVersion = parseMcVersion(project.name)
 boolean isMc26 = mcVersion >= 260000
